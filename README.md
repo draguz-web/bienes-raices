@@ -14,4 +14,4 @@ En `recursos/propiedades.js` (constante `WHATSAPP`) y en los enlaces `wa.me` de 
 ## Publicar en GitHub Pages
 Settings → Pages → "Deploy from a branch" → rama `main`, carpeta `/ (root)`.
 
-El mapa usa Leaflet 1.9.4 (copiado en `recursos/leaflet/`) con el mapa base gratuito de OpenStreetMap (estilo CARTO); no requiere clave.
+El mapa usa Leaflet 1.9.4 (copiado en `recursos/leaflet/`) con el mapa base gratuito de OpenStreetMap; no requiere clave.

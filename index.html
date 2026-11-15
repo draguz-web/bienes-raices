@@ -103,12 +103,12 @@
   const soloZona = document.getElementById('solo-zona');
   const vista = document.getElementById('vista');
 
-  // Mapa centrado en Monterrey. Mapa base gratuito de OpenStreetMap (estilo CARTO).
+  // Mapa centrado en Monterrey. Mapa base gratuito de OpenStreetMap.
   const mapa = L.map('mapa', {zoomControl:false, scrollWheelZoom:true}).setView([25.68, -100.32], 11);
   L.control.zoom({position:'topright'}).addTo(mapa);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19, subdomains: 'abcd',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(mapa);
 
   // Una etiqueta con el precio por propiedad
@@ -198,6 +198,17 @@
 
   P.guardarFiltros(form);
   aplicarFiltros(true);
+
+  // Si el mapa cambia de tamaño (al cargar las letras, girar el celular, etc.), se vuelve a acomodar.
+  // Mientras la persona no haya movido el mapa, se reencuadran todas las propiedades.
+  let movidoPorPersona = false;
+  mapa.on('dragstart zoomstart', e => { if (e.hard !== false && !mapa._ajustando) movidoPorPersona = true; });
+  function reencuadrar(){
+    mapa.invalidateSize();
+    if (!movidoPorPersona && !location.hash){ mapa._ajustando = true; aplicarFiltros(true); mapa._ajustando = false; }
+  }
+  if ('ResizeObserver' in window) new ResizeObserver(reencuadrar).observe(document.getElementById('mapa'));
+  addEventListener('load', reencuadrar);
   // Llegando desde el catálogo con "Ver en el mapa" (index.html#CF-101)
   if (location.hash) centrar(decodeURIComponent(location.hash.slice(1)));
 })();
