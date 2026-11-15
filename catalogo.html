@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Propiedades en venta y renta en Monterrey | Bienes Raíces Monterrey</title>
-<meta name="description" content="Catálogo de casas, departamentos, terrenos y locales en venta y renta en Monterrey y su área metropolitana. Pregunte por cualquier propiedad por WhatsApp.">
+<title>Casas en venta en Monterrey | Bienes Raíces Monterrey</title>
+<meta name="description" content="Catálogo de casas en venta en Monterrey y su área metropolitana. Pregunte por cualquier casa por WhatsApp.">
 <meta name="theme-color" content="#14233F">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Ccircle cx=%2224%22 cy=%2224%22 r=%2224%22 fill=%22%2314233F%22/%3E%3Cpath d=%22M12 25 24 14l12 11M16 23v12h16V23%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%223.4%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_MX">
 <meta property="og:title" content="Propiedades en Monterrey · Bienes Raíces Monterrey">
-<meta property="og:description" content="Casas, departamentos, terrenos y locales en venta y renta.">
+<meta property="og:description" content="Casas en venta en Monterrey.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&display=swap" rel="stylesheet">
@@ -38,26 +38,12 @@
 
 <main class="contenedor">
   <div class="titular">
-    <h1>Propiedades</h1>
-    <p>Casas, departamentos, terrenos y locales en Monterrey y su área metropolitana. Toque una propiedad para ver su ficha o búsquelas en el <a href="index.html" data-conservar-filtros>mapa</a>.</p>
-    <span class="aviso-demo">Catálogo de demostración: las propiedades son de ejemplo.</span>
+    <h1>Casas en venta</h1>
+    <p>Casas en venta en Monterrey y su área metropolitana. Toque una casa para ver su ficha o búsquelas en el <a href="index.html" data-conservar-filtros>mapa</a>.</p>
+    <span class="aviso-demo">Catálogo de demostración: las casas son de ejemplo.</span>
   </div>
 
   <form class="filtros" id="filtros" aria-label="Filtrar propiedades">
-    <fieldset>
-      <legend>Operación</legend>
-      <div class="segmentos">
-        <label><input type="radio" name="operacion" value="" checked>Todas</label>
-        <label><input type="radio" name="operacion" value="venta">Venta</label>
-        <label><input type="radio" name="operacion" value="renta">Renta</label>
-      </div>
-    </fieldset>
-    <label>Tipo
-      <select name="tipo">
-        <option value="">Todos</option>
-        <option>Casa</option><option>Departamento</option><option>Terreno</option><option>Local</option>
-      </select>
-    </label>
     <label>Recámaras
       <select name="recamaras">
         <option value="">Cualquiera</option>
@@ -105,14 +91,13 @@ window.Propiedades.cargar().then(function(){
 
   function pintar(){
     const r = P.filtrar(form);
-    conteo.innerHTML = r.length === 1 ? '<b>1</b> propiedad' : `<b>${r.length}</b> propiedades`;
+    conteo.innerHTML = r.length === 1 ? '<b>1</b> casa' : `<b>${r.length}</b> casas`;
     rejilla.innerHTML = r.length ? r.map(P.tarjeta).join('')
-      : `<p class="vacio">${P.error ? 'No se pudieron cargar las propiedades. Revise su conexión y recargue la página.' : 'No hay propiedades con esos filtros. Pruebe quitando alguno.'}</p>`;
+      : `<p class="vacio">${P.error ? 'No se pudieron cargar las casas. Revise su conexión y recargue la página.' : 'No hay casas con esos filtros. Pruebe quitando alguno.'}</p>`;
   }
 
   P.leerFiltros(form);
   form.addEventListener('change', e => {
-    if (e.target.name === 'operacion') P.opcionesPrecio(form);
     P.guardarFiltros(form); pintar();
   });
   form.addEventListener('reset', () => setTimeout(() => { P.opcionesPrecio(form); P.guardarFiltros(form); pintar(); }));

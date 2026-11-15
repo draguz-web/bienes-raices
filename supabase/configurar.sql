@@ -9,8 +9,8 @@
 create table if not exists public.propiedades (
   id               uuid primary key default gen_random_uuid(),
   clave            text not null unique,
-  operacion        text not null check (operacion in ('venta','renta')),
-  tipo             text not null check (tipo in ('Casa','Departamento','Terreno','Local')),
+  operacion        text not null default 'venta' check (operacion in ('venta','renta')),
+  tipo             text not null default 'Casa' check (tipo in ('Casa','Departamento','Terreno','Local')),
   precio           numeric not null check (precio >= 0),
   colonia          text not null default '',
   municipio        text not null default '',

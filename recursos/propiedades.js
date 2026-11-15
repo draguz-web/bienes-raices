@@ -55,7 +55,7 @@
     return pesos.format(p.precio) + (p.operacion === 'renta' ? ' al mes' : '');
   }
 
-  function titulo(p){ return `${p.tipo} en ${p.colonia}`; }
+  function titulo(p){ return `${p.tipo || "Casa"} en ${p.colonia}`; }
 
   // "3 rec. · 2.5 baños · 185 m²"
   function resumen(p){
@@ -157,7 +157,7 @@
   function tarjeta(p){
     return `<article class="tarjeta" data-clave="${escapar(p.clave)}">
       <button class="tarjeta-abrir" type="button" data-abrir="${escapar(p.clave)}" aria-label="Ver ficha: ${escapar(titulo(p))}, ${escapar(precioLargo(p))}"></button>
-      <div class="tarjeta-img">${imagen(p)}<span class="etiqueta ${p.operacion}">${p.operacion === 'venta' ? 'Venta' : 'Renta'}</span></div>
+      <div class="tarjeta-img">${imagen(p)}</div>
       <div class="tarjeta-texto">
         <h3>${escapar(titulo(p))}</h3>
         <p class="lugar">${escapar(p.municipio)}</p>
@@ -192,7 +192,6 @@
     }
     const datos = [
       ['Clave', p.clave],
-      ['Operación', p.operacion === 'venta' ? 'Venta' : 'Renta'],
       ['Recámaras', p.recamaras],
       ['Baños', p.banos && decimal(p.banos)],
       ['Estacionamientos', p.estacionamientos],
@@ -223,10 +222,9 @@
   }
 
   /* ---------- Filtros (se guardan en la dirección para pasar entre catálogo y mapa) ---------- */
-  const CAMPOS = ['operacion', 'tipo', 'recamaras', 'precio', 'orden'];
+  const CAMPOS = ['recamaras', 'precio', 'orden'];
   function leerFiltros(form){
     const q = new URLSearchParams(location.search);
-    if (q.has('operacion')) form.elements.operacion.value = q.get('operacion');
     opcionesPrecio(form);
     CAMPOS.forEach(c => { if (form.elements[c] && q.has(c)) form.elements[c].value = q.get(c); });
   }
@@ -244,8 +242,6 @@
     const f = Object.fromEntries(CAMPOS.map(c => [c, form.elements[c] ? form.elements[c].value : '']));
     const max = Number(f.precio) || Infinity;
     let r = lista.filter(p =>
-      (!f.operacion || p.operacion === f.operacion) &&
-      (!f.tipo || p.tipo === f.tipo) &&
       (!f.recamaras || p.recamaras >= Number(f.recamaras)) &&
       p.precio <= max);
     const orden = {
@@ -256,15 +252,12 @@
     }[f.orden || 'recientes'];
     return r.sort(orden);
   }
-  // Opciones de "precio hasta" según venta o renta
+  // Opciones de "precio hasta"
   function opcionesPrecio(form){
-    const sel = form.elements.precio, op = form.elements.operacion.value, actual = sel.value;
-    const venta = [1500000, 2500000, 4000000, 6000000, 10000000], renta = [10000, 15000, 20000, 30000, 45000];
-    const valores = op === 'renta' ? renta : op === 'venta' ? venta : [];
+    const sel = form.elements.precio, actual = sel.value;
+    const valores = [1500000, 2000000, 3000000, 4000000, 6000000, 10000000];
     sel.innerHTML = '<option value="">Cualquier precio</option>' +
-      valores.map(v => `<option value="${v}">Hasta ${pesos.format(v)}${op === 'renta' ? ' al mes' : ''}</option>`).join('');
-    sel.disabled = !valores.length;
-    sel.title = valores.length ? '' : 'Elija venta o renta para filtrar por precio';
+      valores.map(v => `<option value="${v}">Hasta ${pesos.format(v)}</option>`).join('');
     if (valores.includes(Number(actual))) sel.value = actual;
   }
 

@@ -96,12 +96,12 @@
       <tr data-id="${p.id}">
         <td class="col-foto">${P.imagen(p)}</td>
         <td><b>${P.escapar(P.titulo(p))}</b><small>${P.escapar(p.clave)} · ${P.escapar(p.municipio)}</small></td>
-        <td>${p.operacion === 'venta' ? 'Venta' : 'Renta'}</td>
+        <td>${p.recamaras || '—'}</td>
         <td class="col-precio">${P.escapar(P.precioLargo(p))}</td>
         <td><label class="interruptor"><input type="checkbox" data-visible ${p.visible ? 'checked' : ''} aria-label="Mostrar ${P.escapar(p.clave)} en el sitio"></label></td>
         <td class="col-acciones"><button class="boton secundario chico" type="button" data-editar>Editar</button></td>
       </tr>`).join('')
-      : `<tr><td colspan="6" class="vacio-tabla">${todas.length ? 'Ninguna propiedad coincide con la búsqueda.' : 'Todavía no hay propiedades. Toque "Agregar propiedad".'}</td></tr>`;
+      : `<tr><td colspan="6" class="vacio-tabla">${todas.length ? 'Ninguna propiedad coincide con la búsqueda.' : 'Todavía no hay casas. Toque "Agregar casa".'}</td></tr>`;
   }
   $('buscar').addEventListener('input', pintarFilas);
 
@@ -158,16 +158,15 @@
     terminado = false;
     form.reset();
     aviso('msg-editor', ''); aviso('msg-fotos', '');
-    $('titulo-editor').textContent = p ? `Editar ${p.clave}` : 'Agregar propiedad';
+    $('titulo-editor').textContent = p ? `Editar ${p.clave}` : 'Agregar casa';
     $('borrar').hidden = !p;
     const d = p || {clave: siguienteClave(), operacion:'venta', tipo:'Casa', visible:true, fotos:[]};
-    ['clave','operacion','tipo','colonia','municipio','descripcion'].forEach(k => { form[k].value = d[k] || form[k].value; });
+    ['clave','colonia','municipio','descripcion'].forEach(k => { form[k].value = d[k] || form[k].value; });
     ['precio','recamaras','banos','estacionamientos','construccion','terreno'].forEach(k => { form[k].value = d[k] != null ? d[k] : (k === 'precio' ? '' : 0); });
     if (!p) form.precio.value = '';
     form.visible.checked = d.visible !== false;
     fotos = [...(d.fotos || [])];
     pintarFotos();
-    notaPrecio();
     editor.showModal();
     prepararMapa();
     setTimeout(() => {
@@ -181,8 +180,6 @@
     form.clave.focus();
   }
 
-  function notaPrecio(){ $('nota-precio').textContent = form.operacion.value === 'renta' ? '(por mes)' : '(precio total)'; }
-  form.operacion.addEventListener('change', notaPrecio);
 
   $('agregar').addEventListener('click', () => abrirEditor(null));
   editor.addEventListener('click', e => { if (e.target.closest('[data-cancelar]')) editor.close(); });
@@ -270,8 +267,8 @@
     const n = k => Number(form[k].value) || 0;
     const datos = {
       clave: form.clave.value.trim(),
-      operacion: form.operacion.value,
-      tipo: form.tipo.value,
+      operacion: 'venta',
+      tipo: 'Casa',
       precio: n('precio'),
       colonia: form.colonia.value.trim(),
       municipio: form.municipio.value.trim(),

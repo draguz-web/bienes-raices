@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Administrar propiedades | Bienes Raíces Monterrey</title>
+<title>Administrar casas | Bienes Raíces Monterrey</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#14233F">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Ccircle cx=%2224%22 cy=%2224%22 r=%2224%22 fill=%22%2314233F%22/%3E%3Cpath d=%22M12 25 24 14l12 11M16 23v12h16V23%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%223.4%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
@@ -65,18 +65,18 @@
   <section id="panel" hidden>
     <div class="panel-encabezado">
       <div>
-        <h1>Propiedades</h1>
+        <h1>Casas en venta</h1>
         <p class="conteo" id="conteo-admin"></p>
       </div>
       <div class="panel-acciones">
         <label class="buscar"><span class="oculto">Buscar</span><input type="search" id="buscar" placeholder="Buscar por clave, colonia o municipio"></label>
-        <button class="boton" type="button" id="agregar"><span aria-hidden="true">+</span> Agregar propiedad</button>
+        <button class="boton" type="button" id="agregar"><span aria-hidden="true">+</span> Agregar casa</button>
       </div>
     </div>
     <p class="mensaje" id="msg-panel" role="status"></p>
     <div class="tabla-envoltura">
       <table class="tabla">
-        <thead><tr><th>Foto</th><th>Propiedad</th><th>Operación</th><th>Precio</th><th>Visible</th><th><span class="oculto">Acciones</span></th></tr></thead>
+        <thead><tr><th>Foto</th><th>Propiedad</th><th>Recámaras</th><th>Precio</th><th>Visible</th><th><span class="oculto">Acciones</span></th></tr></thead>
         <tbody id="filas"></tbody>
       </table>
     </div>
@@ -87,7 +87,7 @@
 <dialog class="editor" id="editor" aria-labelledby="titulo-editor">
   <form id="form-propiedad" novalidate>
     <header class="editor-cabecera">
-      <h2 id="titulo-editor">Agregar propiedad</h2>
+      <h2 id="titulo-editor">Agregar casa</h2>
       <button class="cerrar" type="button" data-cancelar aria-label="Cerrar">×</button>
     </header>
     <div class="editor-cuerpo">
@@ -95,13 +95,8 @@
         <legend>Datos principales</legend>
         <div class="rejilla-campos">
           <label class="campo">Clave<input name="clave" required maxlength="20"></label>
-          <label class="campo">Operación
-            <select name="operacion" required><option value="venta">Venta</option><option value="renta">Renta</option></select>
-          </label>
-          <label class="campo">Tipo
-            <select name="tipo" required><option>Casa</option><option>Departamento</option><option>Terreno</option><option>Local</option></select>
-          </label>
-          <label class="campo">Precio en pesos <small id="nota-precio">(precio total)</small><input name="precio" type="number" min="0" step="1000" inputmode="numeric" required></label>
+          <input type="hidden" name="operacion" value="venta"><input type="hidden" name="tipo" value="Casa">
+          <label class="campo">Precio de venta en pesos<input name="precio" type="number" min="0" step="1000" inputmode="numeric" required></label>
           <label class="campo">Colonia<input name="colonia" required></label>
           <label class="campo">Municipio<input name="municipio" required list="municipios"></label>
         </div>
