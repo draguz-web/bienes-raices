@@ -15,7 +15,7 @@ Lo ideal es crear la cuenta con el correo del cliente, para que la información 
 ## 3. Crear el usuario administrador
 1. **Authentication → Users → Add user → Create new user**.
 2. Use **el mismo correo** que puso en `configurar.sql`, escriba una contraseña y marque **Auto Confirm User**.
-3. Recomendado: **Authentication → Sign In / Providers** y desactive **Allow new users to sign up**, para que nadie más pueda crear cuentas. Aunque alguien se registrara, no podría cambiar nada: solo los correos de la tabla `administradores` tienen permiso.
+3. **Importante:** en **Authentication → Sign In / Providers** desactive **Allow new users to sign up** (y deje activada la confirmación de correo). Así nadie más puede crear una cuenta, ni siquiera con el correo del administrador.
 4. **Authentication → URL Configuration**: en **Site URL** ponga la dirección del sitio (por ejemplo `https://draguz-web.github.io/bienes-raices/`). Así funciona el correo de "Olvidé mi contraseña".
 
 ## 4. Conectar el sitio
