@@ -86,16 +86,18 @@
 <footer class="pie">
   <div class="contenedor">
     <span>© <span id="anio"></span> Bienes Raíces Monterrey</span>
-    <span><a href="index.html">Mapa</a> · <a href="catalogo.html">Catálogo</a></span>
+    <span><a href="index.html">Mapa</a> · <a href="catalogo.html">Catálogo</a> · <a href="admin.html">Administrar</a></span>
   </div>
 </footer>
 
 <a class="flotante" href="https://wa.me/528140297419" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp"><svg aria-hidden="true"><use href="#wa"/></svg></a>
 
+<script src="recursos/config.js"></script>
+<script src="recursos/supabase/supabase.js"></script>
 <script src="recursos/propiedades-datos.js"></script>
 <script src="recursos/propiedades.js"></script>
 <script>
-(function(){
+window.Propiedades.cargar().then(function(){
   const P = window.Propiedades;
   const form = document.getElementById('filtros');
   const rejilla = document.getElementById('rejilla');
@@ -105,7 +107,7 @@
     const r = P.filtrar(form);
     conteo.innerHTML = r.length === 1 ? '<b>1</b> propiedad' : `<b>${r.length}</b> propiedades`;
     rejilla.innerHTML = r.length ? r.map(P.tarjeta).join('')
-      : '<p class="vacio">No hay propiedades con esos filtros. Pruebe quitando alguno.</p>';
+      : `<p class="vacio">${P.error ? 'No se pudieron cargar las propiedades. Revise su conexión y recargue la página.' : 'No hay propiedades con esos filtros. Pruebe quitando alguno.'}</p>`;
   }
 
   P.leerFiltros(form);
@@ -121,9 +123,9 @@
   P.guardarFiltros(form);
   pintar();
 
-  // Abrir la ficha si la dirección trae la clave (por ejemplo catalogo.html#CF-101)
+  // Abrir la ficha si la dirección trae la clave (por ejemplo catalogo.html#P-101)
   if (location.hash) P.abrirFicha(decodeURIComponent(location.hash.slice(1)));
-})();
+});
 </script>
 </body>
 </html>

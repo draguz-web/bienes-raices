@@ -1,8 +1,44 @@
 /* Funciones compartidas por el catálogo (catalogo.html) y el mapa (index.html). */
 (function(){
-  // Número de WhatsApp con lada de país (52) y sin espacios
-  const WHATSAPP = '528140297419';
-  const lista = (window.PROPIEDADES || []).map((p, i) => ({...p, _i:i}));
+  const CONFIG = window.CONFIG || {};
+  // Número de WhatsApp con lada de país (52) y sin espacios (se cambia en recursos/config.js)
+  const WHATSAPP = CONFIG.whatsapp || '528140297419';
+  const conectado = !!(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
+  // La lista se llena con cargar(): desde Supabase si está configurado, si no con las propiedades de ejemplo.
+  const lista = [];
+
+  function normalizar(p){
+    const fotos = Array.isArray(p.fotos) ? p.fotos.filter(Boolean) : (p.foto ? [p.foto] : []);
+    const num = v => Number(v) || 0;
+    return {...p, fotos, foto: fotos[0] || '', precio: num(p.precio), lat: num(p.lat), lng: num(p.lng),
+      recamaras: num(p.recamaras), banos: num(p.banos), estacionamientos: num(p.estacionamientos),
+      construccion: num(p.construccion), terreno: num(p.terreno), publicada: String(p.publicada || '').slice(0, 10),
+      descripcion: p.descripcion || '', colonia: p.colonia || '', municipio: p.municipio || ''};
+  }
+
+  let cliente = null;
+  function supabase(){
+    if (!conectado || !window.supabase) return null;
+    if (!cliente) cliente = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+    return cliente;
+  }
+
+  async function cargar(){
+    let datos = null, error = null;
+    const sb = supabase();
+    if (sb){
+      try {
+        const r = await sb.from('propiedades').select('*').eq('visible', true).order('publicada', {ascending:false});
+        if (r.error) throw r.error;
+        datos = r.data;
+      } catch (e){ console.error('No se pudieron cargar las propiedades', e); error = e; datos = []; }
+    } else datos = window.PROPIEDADES || [];
+    lista.length = 0;
+    datos.forEach((p, i) => lista.push({...normalizar(p), _i:i}));
+    document.querySelectorAll('.aviso-demo').forEach(a => { a.hidden = conectado; });
+    window.Propiedades.error = error;
+    return lista;
+  }
 
   const pesos = new Intl.NumberFormat('es-MX', {style:'currency', currency:'MXN', maximumFractionDigits:0});
   const decimal = n => n.toLocaleString('es-MX', {maximumFractionDigits:2});
@@ -144,7 +180,14 @@
       dialogo = document.createElement('dialog');
       dialogo.className = 'ficha';
       document.body.appendChild(dialogo);
-      dialogo.addEventListener('click', e => { if (e.target === dialogo || e.target.closest('[data-cerrar]')) dialogo.close(); });
+      dialogo.addEventListener('click', e => {
+        if (e.target === dialogo || e.target.closest('[data-cerrar]')) return dialogo.close();
+        const m = e.target.closest('[data-foto]');
+        if (m){
+          dialogo.querySelector('.ficha-img img').src = m.dataset.foto;
+          dialogo.querySelectorAll('[data-foto]').forEach(b => b.toggleAttribute('aria-current', b === m));
+        }
+      });
       dialogo.addEventListener('close', () => { if (location.hash) history.replaceState(null, '', location.pathname + location.search); });
     }
     const datos = [
@@ -162,6 +205,7 @@
     dialogo.innerHTML = `
       <button class="cerrar" type="button" data-cerrar aria-label="Cerrar">×</button>
       <div class="ficha-img">${imagen(p)}</div>
+      ${p.fotos.length > 1 ? `<div class="miniaturas">${p.fotos.map((f, i) => `<button type="button" data-foto="${escapar(f)}" aria-label="Foto ${i + 1}"${i ? '' : ' aria-current="true"'}><img src="${escapar(f)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}
       <div class="ficha-texto">
         <p class="lugar">${escapar(p.colonia)}, ${escapar(p.municipio)}</p>
         <h2>${escapar(titulo(p))}</h2>
@@ -227,7 +271,13 @@
   document.addEventListener('DOMContentLoaded', () => {
     const anio = document.getElementById('anio');
     if (anio) anio.textContent = new Date().getFullYear();
+    // Todos los botones de WhatsApp usan el número de recursos/config.js
+    document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a => {
+      a.href = a.href.replace(/wa\.me\/\d+/, 'wa.me/' + WHATSAPP);
+      const t = a.querySelector('span');
+      if (t && /^\d[\d ]+$/.test(t.textContent.trim())) t.textContent = WHATSAPP.slice(-10).replace(/^(\d{2})(\d{4})(\d{4})$/, '$1 $2 $3');
+    });
   });
 
-  window.Propiedades = {lista, precioCorto, precioLargo, titulo, resumen, tarjeta, imagen, abrirFicha, leerFiltros, guardarFiltros, filtrar, opcionesPrecio, escapar};
+  window.Propiedades = {lista, cargar, supabase, conectado, normalizar, CONFIG, precioCorto, precioLargo, titulo, resumen, tarjeta, imagen, abrirFicha, leerFiltros, guardarFiltros, filtrar, opcionesPrecio, escapar};
 })();

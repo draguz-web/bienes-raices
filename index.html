@@ -92,10 +92,12 @@
 </div>
 
 <script src="recursos/leaflet/leaflet.js"></script>
+<script src="recursos/config.js"></script>
+<script src="recursos/supabase/supabase.js"></script>
 <script src="recursos/propiedades-datos.js"></script>
 <script src="recursos/propiedades.js"></script>
 <script>
-(function(){
+window.Propiedades.cargar().then(function(){
   const P = window.Propiedades;
   const form = document.getElementById('filtros');
   const rejilla = document.getElementById('rejilla');
@@ -153,7 +155,7 @@
     conteo.innerHTML = (r.length === 1 ? '<b>1</b> propiedad' : `<b>${r.length}</b> propiedades`) +
       (soloZona.checked ? ' en esta zona' : '') + (fuera ? ` · ${fuera} fuera del mapa` : '');
     rejilla.innerHTML = r.length ? r.map(P.tarjeta).join('')
-      : `<p class="vacio">${filtradas.length ? 'No hay propiedades en esta parte del mapa. Aleje el mapa o muévalo.' : 'No hay propiedades con esos filtros. Pruebe quitando alguno.'}</p>`;
+      : `<p class="vacio">${P.error ? 'No se pudieron cargar las propiedades. Revise su conexión y recargue la página.' : filtradas.length ? 'No hay propiedades en esta parte del mapa. Aleje el mapa o muévalo.' : 'No hay propiedades con esos filtros. Pruebe quitando alguno.'}</p>`;
   }
 
   function centrar(clave){
@@ -209,9 +211,9 @@
   }
   if ('ResizeObserver' in window) new ResizeObserver(reencuadrar).observe(document.getElementById('mapa'));
   addEventListener('load', reencuadrar);
-  // Llegando desde el catálogo con "Ver en el mapa" (index.html#CF-101)
+  // Llegando desde el catálogo con "Ver en el mapa" (index.html#P-101)
   if (location.hash) centrar(decodeURIComponent(location.hash.slice(1)));
-})();
+});
 </script>
 </body>
 </html>

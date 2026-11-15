@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrar propiedades | Bienes Raíces Monterrey</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#14233F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Ccircle cx=%2224%22 cy=%2224%22 r=%2224%22 fill=%22%2314233F%22/%3E%3Cpath d=%22M12 25 24 14l12 11M16 23v12h16V23%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%223.4%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="recursos/leaflet/leaflet.css">
+<link rel="stylesheet" href="recursos/propiedades.css">
+<link rel="stylesheet" href="recursos/admin.css">
+</head>
+<body class="pagina-admin">
+
+<header class="cabecera">
+  <div class="contenedor barra">
+    <a class="marca" href="index.html" aria-label="Ver el sitio">
+      <svg class="logo-casa" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#fff"/><path d="M12 25 24 14l12 11" fill="none" stroke="#14233F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 23v12h16V23" fill="none" stroke="#14233F" stroke-width="3.2" stroke-linejoin="round"/><rect x="21.5" y="27" width="5" height="8" fill="#4C74A8"/></svg>
+      <span>Bienes Raíces<small>Panel de administración</small></span>
+    </a>
+    <nav aria-label="Panel">
+      <a href="index.html" target="_blank" rel="noopener">Ver sitio</a>
+      <span class="usuario" id="usuario" hidden></span>
+      <button class="boton claro" type="button" id="salir" hidden>Cerrar sesión</button>
+    </nav>
+  </div>
+</header>
+
+<main class="contenedor">
+
+  <!-- Sin conectar -->
+  <section class="caja" id="sin-config" hidden>
+    <h1>Falta conectar la base de datos</h1>
+    <p>El panel guarda las propiedades en Supabase, que es gratis. Para activarlo siga los pasos del archivo <b>CONFIGURAR-SUPABASE.md</b> del repositorio y pegue sus datos en <code>recursos/config.js</code>.</p>
+    <p>Mientras tanto, el sitio muestra las propiedades de ejemplo.</p>
+  </section>
+
+  <!-- Entrar -->
+  <section class="caja entrar" id="entrar" hidden>
+    <h1>Entrar al panel</h1>
+    <form id="form-entrar" novalidate>
+      <label class="campo">Correo<input type="email" name="email" autocomplete="username" required></label>
+      <label class="campo">Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
+      <p class="mensaje" id="msg-entrar" role="alert"></p>
+      <button class="boton" type="submit">Entrar</button>
+      <button class="enlace" type="button" id="olvide">Olvidé mi contraseña</button>
+    </form>
+  </section>
+
+  <!-- Nueva contraseña (al llegar desde el correo de recuperación) -->
+  <section class="caja entrar" id="nueva-clave" hidden>
+    <h1>Nueva contraseña</h1>
+    <form id="form-clave" novalidate>
+      <label class="campo">Escriba su nueva contraseña<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+      <p class="mensaje" id="msg-clave" role="alert"></p>
+      <button class="boton" type="submit">Guardar contraseña</button>
+    </form>
+  </section>
+
+  <!-- Panel -->
+  <section id="panel" hidden>
+    <div class="panel-encabezado">
+      <div>
+        <h1>Propiedades</h1>
+        <p class="conteo" id="conteo-admin"></p>
+      </div>
+      <div class="panel-acciones">
+        <label class="buscar"><span class="oculto">Buscar</span><input type="search" id="buscar" placeholder="Buscar por clave, colonia o municipio"></label>
+        <button class="boton" type="button" id="agregar"><span aria-hidden="true">+</span> Agregar propiedad</button>
+      </div>
+    </div>
+    <p class="mensaje" id="msg-panel" role="status"></p>
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead><tr><th>Foto</th><th>Propiedad</th><th>Operación</th><th>Precio</th><th>Visible</th><th><span class="oculto">Acciones</span></th></tr></thead>
+        <tbody id="filas"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Editor de una propiedad -->
+<dialog class="editor" id="editor" aria-labelledby="titulo-editor">
+  <form id="form-propiedad" novalidate>
+    <header class="editor-cabecera">
+      <h2 id="titulo-editor">Agregar propiedad</h2>
+      <button class="cerrar" type="button" data-cancelar aria-label="Cerrar">×</button>
+    </header>
+    <div class="editor-cuerpo">
+      <fieldset class="grupo">
+        <legend>Datos principales</legend>
+        <div class="rejilla-campos">
+          <label class="campo">Clave<input name="clave" required maxlength="20"></label>
+          <label class="campo">Operación
+            <select name="operacion" required><option value="venta">Venta</option><option value="renta">Renta</option></select>
+          </label>
+          <label class="campo">Tipo
+            <select name="tipo" required><option>Casa</option><option>Departamento</option><option>Terreno</option><option>Local</option></select>
+          </label>
+          <label class="campo">Precio en pesos <small id="nota-precio">(precio total)</small><input name="precio" type="number" min="0" step="1000" inputmode="numeric" required></label>
+          <label class="campo">Colonia<input name="colonia" required></label>
+          <label class="campo">Municipio<input name="municipio" required list="municipios"></label>
+        </div>
+        <datalist id="municipios">
+          <option>Monterrey</option><option>San Pedro Garza García</option><option>Guadalupe</option><option>San Nicolás de los Garza</option>
+          <option>Apodaca</option><option>General Escobedo</option><option>Santa Catarina</option><option>García</option><option>Juárez</option><option>Santiago</option>
+        </datalist>
+      </fieldset>
+
+      <fieldset class="grupo">
+        <legend>Características <small>(deje 0 si no aplica)</small></legend>
+        <div class="rejilla-campos chicos">
+          <label class="campo">Recámaras<input name="recamaras" type="number" min="0" step="1" value="0"></label>
+          <label class="campo">Baños<input name="banos" type="number" min="0" step="0.5" value="0"></label>
+          <label class="campo">Estacionamientos<input name="estacionamientos" type="number" min="0" step="1" value="0"></label>
+          <label class="campo">Construcción m²<input name="construccion" type="number" min="0" step="1" value="0"></label>
+          <label class="campo">Terreno m²<input name="terreno" type="number" min="0" step="1" value="0"></label>
+        </div>
+        <label class="campo">Descripción<textarea name="descripcion" rows="4" maxlength="1500"></textarea></label>
+      </fieldset>
+
+      <fieldset class="grupo">
+        <legend>Ubicación</legend>
+        <p class="ayuda">Toque el mapa o arrastre el marcador hasta donde está la propiedad.</p>
+        <div class="ubicar">
+          <button class="boton secundario chico" type="button" id="ubicar-colonia">Buscar la colonia en el mapa</button>
+          <span class="coordenadas" id="coordenadas">Sin ubicación</span>
+        </div>
+        <div id="mapa-editor"></div>
+        <input type="hidden" name="lat"><input type="hidden" name="lng">
+      </fieldset>
+
+      <fieldset class="grupo">
+        <legend>Fotos</legend>
+        <p class="ayuda">La primera es la que sale en el catálogo y en el mapa. Se reducen solas para que carguen rápido.</p>
+        <div class="fotos" id="fotos"></div>
+        <label class="boton secundario chico subir">
+          <input type="file" id="subir-fotos" accept="image/*" multiple>Agregar fotos
+        </label>
+        <p class="mensaje" id="msg-fotos" role="status"></p>
+      </fieldset>
+
+      <label class="interruptor"><input type="checkbox" name="visible" checked> Mostrar en el sitio</label>
+    </div>
+    <footer class="editor-pie">
+      <p class="mensaje" id="msg-editor" role="alert"></p>
+      <button class="enlace peligro" type="button" id="borrar" hidden>Borrar propiedad</button>
+      <button class="boton secundario" type="button" data-cancelar>Cancelar</button>
+      <button class="boton" type="submit" id="guardar">Guardar</button>
+    </footer>
+  </form>
+</dialog>
+
+<script src="recursos/config.js"></script>
+<script src="recursos/supabase/supabase.js"></script>
+<script src="recursos/leaflet/leaflet.js"></script>
+<script src="recursos/propiedades.js"></script>
+<script src="recursos/admin.js"></script>
+</body>
+</html>
